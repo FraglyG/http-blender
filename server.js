@@ -11,6 +11,12 @@ app.use(express.json());
 
 const WORK_DIR = path.join(os.tmpdir(), "blender_tasks");
 
+const SCRIPT_HEADER = `
+import bpy
+bpy.ops.object.select_all(action='SELECT')
+bpy.ops.object.delete()
+`;
+
 const EXPORT_FOOTER = (outputPath, format) => {
     if (format === "glb") {
         return `
