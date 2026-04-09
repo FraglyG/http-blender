@@ -11,6 +11,12 @@ app.use(express.json());
 
 const WORK_DIR = path.join(os.tmpdir(), "blender_tasks");
 
+const SCRIPT_HEADER = `
+import bpy
+bpy.ops.object.select_all(action='SELECT')
+bpy.ops.object.delete()
+`;
+
 const EXPORT_FOOTER = (outputPath) => `
 import bpy, os
 bpy.ops.object.select_all(action='DESELECT')
@@ -28,7 +34,7 @@ app.post("/generate", async (req, res) => {
     const scriptPath = path.join(WORK_DIR, `${id}.py`);
     const outputPath = path.join(WORK_DIR, `${id}.obj`);
 
-    await writeFile(scriptPath, code + "\n" + EXPORT_FOOTER(outputPath));
+    await writeFile(scriptPath, SCRIPT_HEADER + "\n" + code + "\n" + EXPORT_FOOTER(outputPath));
 
     execFile(
         "/home/headless/blender/blender",
