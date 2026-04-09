@@ -17,7 +17,7 @@ bpy.ops.object.select_all(action='DESELECT')
 for obj in bpy.data.objects:
     if obj.type == 'MESH':
         obj.select_set(True)
-bpy.ops.export_scene.obj(filepath=${JSON.stringify(outputPath)}, use_selection=True)
+bpy.ops.wm.obj_export(filepath=${JSON.stringify(outputPath)}, export_selected_objects=True)
 `;
 
 app.post("/generate", async (req, res) => {
