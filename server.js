@@ -11,20 +11,30 @@ app.use(express.json());
 
 const WORK_DIR = path.join(os.tmpdir(), "blender_tasks");
 
-const SCRIPT_HEADER = `
+const EXPORT_FOOTER = (outputPath, format) => {
+    if (format === "glb") {
+        return `
 import bpy
-bpy.ops.object.select_all(action='SELECT')
-bpy.ops.object.delete()
+bpy.ops.object.select_all(action='DESELECT')
+for obj in bpy.data.objects:
+    if obj.type == 'MESH':
+        obj.select_set(True)
+bpy.ops.export_scene.gltf(
+    filepath=${JSON.stringify(outputPath)},
+    export_format='GLB',
+    use_selection=True
+)
 `;
-
-const EXPORT_FOOTER = (outputPath) => `
-import bpy, os
+    }
+    return `
+import bpy
 bpy.ops.object.select_all(action='DESELECT')
 for obj in bpy.data.objects:
     if obj.type == 'MESH':
         obj.select_set(True)
 bpy.ops.wm.obj_export(filepath=${JSON.stringify(outputPath)}, export_selected_objects=True)
 `;
+};
 
 function detectFormat(code) {
     const materialIndicators = [
@@ -53,7 +63,7 @@ app.post("/generate", async (req, res) => {
     const format = detectFormat(code);
     const outputPath = path.join(WORK_DIR, `${id}.${format}`);
 
-    await writeFile(scriptPath, SCRIPT_HEADER + "\n" + code + "\n" + EXPORT_FOOTER(outputPath));
+    await writeFile(scriptPath, SCRIPT_HEADER + "\n" + code + "\n" + EXPORT_FOOTER(outputPath, format));
 
     execFile(
         "/home/headless/blender/blender",
