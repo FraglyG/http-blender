@@ -1,10 +1,18 @@
 FROM blenderkit/headless-blender:blender-5.2
 
 USER root
-RUN apt-get update && apt-get install -y python3-pip
-RUN pip3 install flask
 
-COPY server.py /server.py
+RUN apt-get update && apt-get install -y curl && \
+    curl -fsSL https://deb.nodesource.com/setup_lts.x | bash - && \
+    apt-get install -y nodejs && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+COPY package.json ./
+RUN npm install
+COPY server.js ./
+
+RUN mkdir -p /tmp/blender_tasks
 
 EXPOSE 5000
-CMD ["python3", "/server.py"]
+CMD ["node", "server.js"]
