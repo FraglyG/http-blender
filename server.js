@@ -39,6 +39,10 @@ function detectFormat(code) {
     return materialIndicators.some(indicator => code.includes(indicator)) ? "glb" : "obj";
 }
 
+app.get("/health", (req, res) => {
+    res.json({ status: "ok" });
+});
+
 app.post("/generate", async (req, res) => {
     const { code } = req.body ?? {};
     if (!code) return res.status(400).json({ error: "Missing 'code' field" });
