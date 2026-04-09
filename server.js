@@ -26,13 +26,28 @@ for obj in bpy.data.objects:
 bpy.ops.wm.obj_export(filepath=${JSON.stringify(outputPath)}, export_selected_objects=True)
 `;
 
+function detectFormat(code) {
+    const materialIndicators = [
+        "bpy.data.materials",
+        "bpy.ops.object.material_slot",
+        "node_tree",
+        "ShaderNodeBsdf",
+        "ShaderNodeTex",
+        "Image.load",
+        "bpy.data.images",
+    ];
+    return materialIndicators.some(indicator => code.includes(indicator)) ? "glb" : "obj";
+}
+
 app.post("/generate", async (req, res) => {
     const { code } = req.body ?? {};
     if (!code) return res.status(400).json({ error: "Missing 'code' field" });
 
     const id = randomUUID();
     const scriptPath = path.join(WORK_DIR, `${id}.py`);
-    const outputPath = path.join(WORK_DIR, `${id}.obj`);
+
+    const format = detectFormat(code);
+    const outputPath = path.join(WORK_DIR, `${id}.${format}`);
 
     await writeFile(scriptPath, SCRIPT_HEADER + "\n" + code + "\n" + EXPORT_FOOTER(outputPath));
 
@@ -53,7 +68,7 @@ app.post("/generate", async (req, res) => {
                 return res.status(500).json({ error: "Blender ran but produced no output file" });
             }
 
-            res.setHeader("Content-Disposition", 'attachment; filename="model.obj"');
+            res.setHeader("Content-Disposition", `attachment; filename="model.${format}"`);
             res.setHeader("Content-Type", "application/octet-stream");
 
             const stream = createReadStream(outputPath);
