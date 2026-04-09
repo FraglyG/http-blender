@@ -31,7 +31,7 @@ app.post("/generate", async (req, res) => {
     await writeFile(scriptPath, code + "\n" + EXPORT_FOOTER(outputPath));
 
     execFile(
-        "blender",
+        "/home/headless/blender/blender",
         ["--background", "--python", scriptPath],
         { timeout: 60_000 },
         async (err, _stdout, stderr) => {
