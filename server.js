@@ -63,4 +63,4 @@ app.post("/generate", async (req, res) => {
     );
 });
 
-app.listen(5000, "0.0.0.0", () => console.log("Listening on :5000"));
+app.listen(80, () => console.log("Listening on :80"));

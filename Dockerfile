@@ -14,5 +14,5 @@ COPY server.js ./
 
 RUN mkdir -p /tmp/blender_tasks
 
-EXPOSE 5000
+EXPOSE 80
 CMD ["node", "server.js"]
