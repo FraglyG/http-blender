@@ -11,8 +11,13 @@ WORKDIR /app
 COPY package.json ./
 RUN npm install
 COPY server.js ./
+COPY lib ./lib
+COPY py ./py
 
-RUN mkdir -p /tmp/blender_tasks
+# Sessions live here. Without a mounted volume this is container-local, which is survivable
+# (sessions are working state, not deliverables) but means a redeploy drops in-flight work.
+ENV DATA_DIR=/data
+RUN mkdir -p /data
 
 EXPOSE 80
 CMD ["node", "server.js"]
